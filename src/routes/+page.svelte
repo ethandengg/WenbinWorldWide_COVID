@@ -9,8 +9,8 @@
 
   
   <main>
-	<h1>WorldWide Covid Data</h1>
-	<p>A Visualization of how covid took over the world, here is the data we used <a href="https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download">Covid Data</a>.</p>
+	<h1>Wenbin WorldWide INC. COVID Investigation</h1>
+	<p>A story of how covid took over the world and changed everything, here is the dataset used <a href="https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download">Covid Data</a>.</p>
 	<input type="range" min="0" max="daysCount" value="0" id="timeSlider" step="1">
 	<label for="timeSlider" id="sliderLabel">Date: </label>
 	<WorldMap/>
@@ -24,7 +24,7 @@
 		padding: 1em;
 		width: 100%;
 		margin: 0 auto;
-		font-family: 'Rubik', sans-serif; /* Change the font-family as needed */
+		font-family: 'Copperplate', Sans-serif; /* Change the font-family as needed */
 	}
 
 	h1 {
@@ -32,11 +32,11 @@
 		text-transform: uppercase;
 		font-size: 4em;
 		font-weight: 3000;
-		font-family: 'DM Serif Display', serif; /* Change the font-family as needed */
+		font-family: 'Times', Sans-serif; /* Change the font-family as needed */
 	}
 
 	p {
-		font-family: 'Oswald', sans-serif; /* Change the font-family as needed */
+		font-family: 'Luminari', sans-serif; /* Change the font-family as needed */
 		font-size: 1.3em; /* Adjust the size as needed */
 	}
 
@@ -49,7 +49,7 @@
     #timeSlider::-moz-range-track {
         width: 100%;
         height: 8px;
-        background: #ffffff;
+        background: #f10303;
         border-radius: 10px;
     }
     #timeSlider::-webkit-slider-thumb {
@@ -64,6 +64,6 @@
         display: block;
         margin-top: 10px; 
         font-size: 1.1em;
-        color: #333;
+        color: #080808;
     }
 </style>

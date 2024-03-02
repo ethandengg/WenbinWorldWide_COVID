@@ -15,6 +15,7 @@
             .domain([0, 10000, 50000, 100000, 500000, 1000000])
             .range(["#316754", "#F9F208", "#F5BE16", "#F56016", "#F51616", "#A10707"]);
 
+
     function setProjectionAndPath() {
     // Remove the scaling based on svg.clientWidth / svg.clientHeight
     // The viewBox will handle scaling, so we only need to focus on centering the map
@@ -37,7 +38,7 @@
         window.addEventListener('resize', () => {
         setProjectionAndPath();
         updateMap(dates[0]); // Make sure to pass the correct current date
-        ç});
+        });
         dates = Object.keys(covidData[Object.keys(covidData)[0]]);
         daysCount = dates.length - 1;
     
@@ -108,20 +109,22 @@
             .attr('fill', d => {
                 const countryData = covidData[d.properties.name];
                 const data = countryData && countryData[dates[0]] ? countryData[dates[0]] : { cases: 0, deaths: 0, recovered: 0 };
-                return colorScale(data.cases);
+                const fillColor = colorScale(data.cases);
+                d.originalColor = fillColor; // Store the original color in the data object
+                return fillColor;
             })
             .attr('stroke', '#85F5CC') // Set the stroke color to black
             .attr('stroke-width', 0.5); // Set the stroke width
 
         // Attach event listeners
         paths.on('mouseover', (event, d) => {
-                const countryData = covidData[d.properties.name];
-                const data = countryData && countryData[dates[0]] ? countryData[dates[0]] : { cases: 0, deaths: 0, recovered: 0 };
-                tooltip
-                    .style('left', `${event.pageX + 15}px`)
-                    .style('top', `${event.pageY + 15}px`)
-                    .style('visibility', 'visible')
-                    .html(`<strong>${d.properties.name}</strong><br/>Cases: ${data.cases}<br/>Deaths: ${data.deaths}<br/>Recovered: ${data.recovered}`);
+            const countryData = covidData[d.properties.name];
+            const data = countryData && countryData[dates[0]] ? countryData[dates[0]] : { cases: 0, deaths: 0, recovered: 0 };
+            tooltip
+                .style('left', `${event.pageX + 15}px`)
+                .style('top', `${event.pageY + 15}px`)
+                .style('visibility', 'visible')
+                .html(`<strong>${d.properties.name}</strong><br/>Cases: ${data.cases}<br/>Deaths: ${data.deaths}<br/>Recovered: ${data.recovered}`);
             })
             .on('mousemove', (event) => {
                 tooltip
@@ -131,6 +134,7 @@
             .on('mouseout', () => {
                 tooltip.style('visibility', 'hidden');
             });
+
     }
 
 
@@ -143,7 +147,9 @@
             .attr('fill', d => {
                 const countryData = covidData[d.properties.name];
                 const data = countryData && countryData[currentDate] ? countryData[currentDate] : { cases: 0, deaths: 0, recovered: 0 };
-                return colorScale(data.cases); // Use the current date's data for the color scale
+                const fillColor = colorScale(data.cases);
+                d.originalColor = fillColor; // Update the original color in the data object
+                return fillColor;
             });
 
         // Reattach tooltip event listeners
@@ -155,14 +161,18 @@
                 .style('top', `${event.pageY + 15}px`)
                 .style('visibility', 'visible')
                 .html(`<strong>${d.properties.name}</strong><br/>Cases: ${data.cases}<br/>Deaths: ${data.deaths}<br/>Recovered: ${data.recovered}`);
+            const currentColor = d3.select(event.currentTarget).attr('fill');
+            const brighterColor = d3.color(currentColor).brighter(0.7).toString();
+            d3.select(event.currentTarget).attr('fill', brighterColor);
         })
         .on('mousemove', (event) => {
             tooltip
                 .style('left', `${event.pageX + 15}px`)
                 .style('top', `${event.pageY + 15}px`);
         })
-        .on('mouseout', () => {
+        .on('mouseout', function(event, d) {
             tooltip.style('visibility', 'hidden');
+            d3.select(event.currentTarget).attr('fill', d.originalColor); // Reset to the original color
         });
     }
 
