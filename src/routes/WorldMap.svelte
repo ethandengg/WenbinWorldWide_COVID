@@ -192,7 +192,7 @@ function drawLine(g, data, metric, color, xScale, yScale) {
         .attr("d", line)
         .attr("fill", "none")
         .attr("stroke", "transparent")
-        .attr("stroke-width", 40) // Adjust this value to increase or decrease the hover area
+        .attr("stroke-width", 50) // Adjust this value to increase or decrease the hover area
         .on('mouseover', () => tooltip.style('visibility', 'visible'))
         .on('mousemove', (event, d) => {
             const [x, y] = d3.pointer(event);
@@ -217,7 +217,7 @@ function drawLine(g, data, metric, color, xScale, yScale) {
         d3.select(lineGraphSvg).select(`.line.${metric}`)
             .datum(filteredData)
             .transition()
-            .duration(500)
+            .duration(150)
             .attr('d', lineGenerator)
             .attr('stroke', color);
     }
