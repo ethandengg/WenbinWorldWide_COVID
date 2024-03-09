@@ -1,6 +1,16 @@
 <script>
     import { onMount } from 'svelte';
     import * as d3 from 'd3';
+    import { onDestroy } from 'svelte';
+    import { playing } from './store.js';
+    import { get, writable } from 'svelte/store';
+
+    onDestroy(() => {
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+    });
+
 
     let svg;
     let projection;
@@ -14,6 +24,45 @@
     let globalCovidData;
     let lineGraphSvg;
     let xScale, yScale, xAxis, yAxis;
+    let intervalId;
+    let speed = 300;
+
+    export function playTimeSlider() {
+        let currentlyPlaying;
+        playing.subscribe(value => {
+            currentlyPlaying = value;
+        });
+        if (currentlyPlaying) {
+            clearInterval(intervalId);
+            playing.set(false);
+        } else {
+            playing.set(true);
+            intervalId = setInterval(() => {
+                const slider = document.getElementById('timeSlider');
+                let newValue = parseInt(slider.value) + 1;
+                if (newValue > daysCount) {
+                    newValue = 0; // Reset to start or stop at the end as per your need
+                    clearInterval(intervalId); // Optionally stop when it reaches the end
+                    playing = false;
+                }
+                slider.value = newValue.toString();
+                slider.dispatchEvent(new Event('input'));
+            }, speed); // The time in ms between each increment (1000ms = 1 second)
+        }
+    }
+
+    function changeSpeed(newSpeed) {
+        speed = newSpeed;
+        if ($playing) {
+        playTimeSlider(); // Restart with new speed
+        }
+    }
+
+
+    export function stopTimeSlider() {
+        clearInterval(intervalId);
+        playing.set(false);
+    }
 
     function toggleGraph() {
         showLineGraph = !showLineGraph;
@@ -292,7 +341,7 @@ function drawLine(g, data, metric, color, xScale, yScale) {
         const paths = d3.select(svg).selectAll('path');
 
         paths.transition()
-            .duration(500)
+            .duration(150)
             .attr('fill', d => {
                 const countryData = covidData[d.properties.name];
                 const data = countryData && countryData[currentDate] ? countryData[currentDate] : { cases: 0, deaths: 0, recovered: 0 };
@@ -325,7 +374,9 @@ function drawLine(g, data, metric, color, xScale, yScale) {
     }
 </script>
 
+<button on:click={playTimeSlider}>{playing ? 'Pause' : 'Play'}</button>
 <button on:click={toggleGraph}>{showLineGraph ? 'Show Map' : 'Show Line Graph'}</button>
+
 <div class="map-container" style="display: {showLineGraph ? 'none' : 'block'};">
     <!-- World Map SVG -->
     <svg bind:this={svg} width="100%" height="100%" viewBox="200 200 700 700"></svg>
