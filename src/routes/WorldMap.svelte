@@ -4,6 +4,26 @@
     import { onDestroy } from 'svelte';
     import { playing } from './store.js';
     import { get, writable } from 'svelte/store';
+    import { currentHeadline } from './store.js';
+
+
+    let eventHeadlines = [
+    { date: '2020-01-22', headline: '2020-01-22: First travel-related case of COVID-19 detected in the U.S. in Washington State.' },
+    { date: '2020-01-30', headline: '2020-01-30: Human-to-human transmission of COVID-19 confirmed in the U.S., leading to increased precautions.' },
+    { date: '2020-02-03', headline: '2020-02-03: U.S. declares public health emergency for COVID-19, implementing travel restrictions and quarantine measures.' },
+    { date: '2020-02-29', headline: '2020-02-29: First death due to COVID-19 reported in the U.S. in Washington State.' },
+    { date: '2020-03-11', headline: '2020-03-11: COVID-19 declared a pandemic by WHO, highlighting the global spread and impact of the virus.' },
+    { date: '2020-03-13', headline: '2020-03-13: National emergency declared in the U.S. to combat COVID-19, freeing up resources and funding.' },
+    { date: '2020-03-27', headline: '2020-03-27: The CARES Act signed into law in the U.S., providing economic relief and support during the pandemic.' },
+    { date: '2020-05-01', headline: '2020-05-01: Emergency use authorization for Remdesivir, an antiviral drug, for treating COVID-19 patients.' },
+    { date: '2020-07-06', headline: '2020-07-06: Over 200 scientists address airborne transmission risks of COVID-19, urging updates to safety guidelines.' },
+    { date: '2020-07-22', headline: '2020-07-22: CDC extends the no sail order for cruise ships, citing ongoing COVID-19 concerns.' },
+    { date: '2020-07-27', headline: '2020-07-27: Moderna\'s COVID-19 vaccine begins Phase 3 clinical trial in the U.S., a crucial step towards approval.' }
+];
+
+
+
+    
 
     onDestroy(() => {
         if (intervalId) {
@@ -26,7 +46,7 @@
     let xScale, yScale, xAxis, yAxis;
     let intervalId;
     let speed = 300;
-    
+    let lastHeadline = ''; // This will hold the last headline
 
     export function playTimeSlider() {
     playing.update(current => {
@@ -48,7 +68,9 @@
             return true;
         }
     });
+      
 }
+
 
     const minInterval = 50; // Minimum interval value (fastest speed)
     const maxInterval = 1000; // Maximum interval value (slowest speed)
@@ -180,32 +202,40 @@
     drawLine(g, globalCovidData, 'recovered', '#00e676', xScale, yScale);
 }
 
-    function updateLineGraph(currentDate) {
-    const filteredData = globalCovidData.filter(d => d.date <= currentDate);
 
-    // Update xScale domain based on filtered data
-    xScale.domain(d3.extent(filteredData, d => d.date));
+function updateLineGraph(currentDate) {
+        const filteredData = globalCovidData.filter(d => d.date <= currentDate);
 
-    // Update yScale domain based on filtered data
-    yScale.domain([0, d3.max(filteredData, d => Math.max(d.cases, d.deaths, d.recovered))]);
+        // Update xScale domain based on filtered data
+        xScale.domain(d3.extent(filteredData, d => d.date));
 
-    // Select and update the x-axis
-    d3.select(lineGraphSvg).select('.x-axis')
-        .transition()
-        .duration(150)
-        .call(xAxis);
+        // Update yScale domain based on filtered data
+        yScale.domain([0, d3.max(filteredData, d => Math.max(d.cases, d.deaths, d.recovered))]);
 
-    // Select and update the y-axis
-    d3.select(lineGraphSvg).select('.y-axis')
-        .transition()
-        .duration(150)
-        .call(yAxis);
+        // Select and update the x-axis
+        d3.select(lineGraphSvg).select('.x-axis')
+            .transition()
+            .duration(150)
+            .call(xAxis);
 
-    // Update lines
-    updateLine('Cases', filteredData);
-    updateLine('Recovered', filteredData);
-    updateLine('deaths', filteredData);
-}
+        // Select and update the y-axis
+        d3.select(lineGraphSvg).select('.y-axis')
+            .transition()
+            .duration(150)
+            .call(yAxis);
+
+        // Update lines
+        updateLine('Cases', filteredData);
+        updateLine('Recovered', filteredData);
+        updateLine('Deaths', filteredData);
+
+        // Update the current headline based on the date
+        let eventForCurrentDate = eventHeadlines.find(e => e.date === currentDate);
+        if (eventForCurrentDate) {
+            lastHeadline = eventForCurrentDate.headline;
+        }
+        currentHeadline.set(lastHeadline); // Set the current headline for the line graph as well
+    }
 
 function updateLine(metric, filteredData) {
     // Create a new d3 line generator using the updated scales
@@ -372,10 +402,23 @@ function drawLine(g, data, metric, color, xScale, yScale) {
             .on('mouseout', function(event, d) {
                 tooltip.style('visibility', 'hidden');
                 d3.select(event.currentTarget).attr('fill', d.originalColor);
+
+            
             });
+        let headline = eventHeadlines.find(event => event.date === currentDate);
+        currentHeadline.set(headline ? headline.headline : '');
+        
+        let eventForCurrentDate = eventHeadlines.find(e => e.date === currentDate);
+
+
+      if (eventForCurrentDate) {
+        // Update lastHeadline only if a new event is found
+        lastHeadline = eventForCurrentDate.headline;
+    }
+    // Always set the currentHeadline to the last known headline
+    currentHeadline.set(lastHeadline);
     }
 </script>
-<!-- Add the speed slider input element -->
 <div>
     <label for="speedSlider">Speed: </label>
     <input type="range" id="speedSlider" min="50" max="1000" value="300" step="50" on:input={changeSpeed}>
@@ -385,11 +428,17 @@ function drawLine(g, data, metric, color, xScale, yScale) {
 <button on:click={toggleGraph}>{showLineGraph ? 'Show Map' : 'Show Line Graph'}</button>
 
 <div class="map-container" style="display: {showLineGraph ? 'none' : 'block'};">
+    <!-- Current Headline display -->
+    <div class="current-headline">{$currentHeadline}</div>
     <!-- World Map SVG -->
     <svg bind:this={svg} width="100%" height="100%" viewBox="200 200 700 700"></svg>
 </div>
+
 <div class="line-graph-container" style="display: {showLineGraph ? 'block' : 'none'};">
+    <!-- Current Headline display -->
+    <div class="current-headline">{$currentHeadline}</div>
     <!-- Line Graph SVG -->
     <svg bind:this={lineGraphSvg} width="100%" height="650"></svg>
 </div>
+
 <div class="tooltip" bind:this={tooltip}></div>
