@@ -167,5 +167,4 @@
   .end-page button:hover {
     background-color: #690000;
   }
-  
   </style>
