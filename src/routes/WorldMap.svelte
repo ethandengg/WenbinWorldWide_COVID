@@ -5,7 +5,12 @@
     import { playing } from './store.js';
     import { get, writable } from 'svelte/store';
     import { currentHeadline } from './store.js';
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
 
+    function navigateToEndPage() {
+        dispatch('endPage');
+    }
 
     let eventHeadlines = [
     { date: '2020-01-22', headline: '2020-01-22: First travel-related case of COVID-19 detected in the U.S. in Washington State.' },
@@ -20,10 +25,6 @@
     { date: '2020-07-22', headline: '2020-07-22: CDC extends the no sail order for cruise ships, citing ongoing COVID-19 concerns.' },
     { date: '2020-07-27', headline: '2020-07-27: Moderna\'s COVID-19 vaccine begins Phase 3 clinical trial in the U.S., a crucial step towards approval.' }
 ];
-
-
-
-    
 
     onDestroy(() => {
         if (intervalId) {
@@ -426,6 +427,7 @@ function drawLine(g, data, metric, color, xScale, yScale) {
 
 <button on:click={playTimeSlider}>{$playing ? 'Pause' : 'Play'}</button>
 <button on:click={toggleGraph}>{showLineGraph ? 'Show Map' : 'Show Line Graph'}</button>
+<button on:click={navigateToEndPage}>Go to End Page</button>
 
 <div class="map-container" style="display: {showLineGraph ? 'none' : 'block'};">
     <!-- Current Headline display -->

@@ -7,9 +7,13 @@
   
     let playPauseText = 'Play';
     let showTitlePage = true;
+    let showEndPage = false;
   
     function goToMap() {
       showTitlePage = false;
+    }
+    function goToEndPage() {
+      showEndPage = true;
     }
   
     $: playPauseText = $playing ? 'Pause' : 'Play';
@@ -27,6 +31,12 @@
       <p>click through to know how it happened</p>
       <button on:click={goToMap}>Explore the Map</button>
     </main>
+  {:else if showEndPage}
+    <main class="end-page">
+      <h2>Reflecting on the Pandemic</h2>
+      <p>While the growth of COVID-19 was exponential in overall cases, not every country experienced this. For example, China had the most cases at the beginning, but their lockdown mandates stopped the spread of COVID-19 very effectively, unlike the US or Brazil.</p>
+      <button on:click={() => showEndPage = false}>Back to Map</button>
+    </main>
   {:else}
     <main>
       <h1>Wenbin WorldWide INC. COVID Investigation</h1>
@@ -34,7 +44,7 @@
       <p>Explore how covid took over the world and changed everything, here is the dataset used <a href="https://www.kaggle.com/datasets/imdevskp/corona-virus-report?resource=download">Covid Data</a>.</p>
       <input type="range" min="0" max="daysCount" value="0" id="timeSlider" step="1">
       <label for="timeSlider" id="sliderLabel">Date: </label>
-      <WorldMap/>
+      <WorldMap on:endPage={goToEndPage}/>
     </main>
   {/if}
   
@@ -111,19 +121,51 @@
     margin-bottom: 1em;
   }
   
-    .title-page button {
-      font-size: 1.2em;
-      padding: 0.5em 1em;
-      cursor: pointer;
-      background-color: #4b0000;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      transition: background-color 0.3s;
-    }
-  
-    .title-page button:hover {
-      background-color: #690000;
-    }
+  .title-page button {
+    font-size: 1.2em;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    background-color: #4b0000;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    transition: background-color 0.3s;
+  }
+
+  .title-page button:hover {
+    background-color: #690000;
+  }
+
+  .end-page {
+  text-align: center;
+  padding: 2em;
+  max-width: 1200px;
+  margin: 0 auto;
+  }
+
+  .end-page h2 {
+    font-size: 2.5em;
+    margin-bottom: 1em;
+  }
+
+  .end-page p {
+    font-size: 1.5em;
+    margin-bottom: 2em;
+  }
+
+  .end-page button {
+    font-size: 1.2em;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    background-color: #4b0000;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    transition: background-color 0.3s;
+  }
+
+  .end-page button:hover {
+    background-color: #690000;
+  }
   
   </style>
